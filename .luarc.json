@@ -1,6 +1,9 @@
 {
-  "diagnostics.globals": ["vim"],
+    "diagnostics.globals": [
+        "vim"
+    ],
     "diagnostics.disable": [
-        "different-requires"
+        "different-requires",
+        "missing-fields"
     ]
 }

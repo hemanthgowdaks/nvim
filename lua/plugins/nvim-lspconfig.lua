@@ -8,10 +8,13 @@ local config = function()
 	local lspconfig = require("lspconfig")
 	local capabilities = cmp_nvim_lsp.default_capabilities()
 
-	for type, icon in pairs(diagnostic_signs) do
-		local hl = "DiagnosticSign" .. type
-		vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
-	end
+	-- solidity
+	lspconfig.solidity_ls.setup({
+		capabilities = capabilities,
+		on_attach = on_attach,
+		filetypes = { "solidity" },
+		root_dir = lspconfig.util.root_pattern("hardhat.config.*", ".git"),
+	})
 
 	-- lua
 	lspconfig.lua_ls.setup({
@@ -24,10 +27,9 @@ local config = function()
 					globals = { "vim" },
 				},
 				workspace = {
-					-- make language server aware of runtime files
 					library = {
-						[vim.fn.expand("$VIMRUNTIME/lua")] = true,
-						[vim.fn.stdpath("config") .. "/lua"] = true,
+						vim.fn.expand("$VIMRUNTIME/lua"),
+						vim.fn.expand("$XDG_CONFIG_HOME") .. "/nvim/lua",
 					},
 				},
 			},
@@ -59,7 +61,7 @@ local config = function()
 	})
 
 	-- typescript
-	lspconfig.tsserver.setup({
+	lspconfig.ts_ls.setup({
 		on_attach = on_attach,
 		capabilities = capabilities,
 		filetypes = {
@@ -77,7 +79,6 @@ local config = function()
 				indentSize = 2,
 			},
 		},
-		root_dir = lspconfig.util.root_pattern("package.json", "tsconfig.json", ".git"),
 	})
 
 	-- bash
@@ -85,13 +86,6 @@ local config = function()
 		capabilities = capabilities,
 		on_attach = on_attach,
 		filetypes = { "sh", "aliasrc" },
-	})
-
-	-- solidity
-	lspconfig.solidity.setup({
-		capabilities = capabilities,
-		on_attach = on_attach,
-		filetypes = { "solidity" },
 	})
 
 	-- typescriptreact, javascriptreact, css, sass, scss, less, svelte, vue
@@ -128,23 +122,29 @@ local config = function()
 		},
 	})
 
+	for type, icon in pairs(diagnostic_signs) do
+		local hl = "DiagnosticSign" .. type
+		vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
+	end
+
+	local solhint = require("efmls-configs.linters.solhint")
+	local prettier_d = require("efmls-configs.formatters.prettier_d")
 	local luacheck = require("efmls-configs.linters.luacheck")
 	local stylua = require("efmls-configs.formatters.stylua")
 	local flake8 = require("efmls-configs.linters.flake8")
 	local black = require("efmls-configs.formatters.black")
 	local eslint = require("efmls-configs.linters.eslint")
-	local prettier_d = require("efmls-configs.formatters.prettier_d")
 	local fixjson = require("efmls-configs.formatters.fixjson")
 	local shellcheck = require("efmls-configs.linters.shellcheck")
 	local shfmt = require("efmls-configs.formatters.shfmt")
 	local hadolint = require("efmls-configs.linters.hadolint")
-	local solhint = require("efmls-configs.linters.solhint")
 	local cpplint = require("efmls-configs.linters.cpplint")
 	local clangformat = require("efmls-configs.formatters.clang_format")
 
 	-- configure efm server
 	lspconfig.efm.setup({
 		filetypes = {
+			"solidity",
 			"lua",
 			"python",
 			"json",
@@ -158,7 +158,6 @@ local config = function()
 			"vue",
 			"markdown",
 			"docker",
-			"solidity",
 			"html",
 			"css",
 			"c",
@@ -174,6 +173,7 @@ local config = function()
 		},
 		settings = {
 			languages = {
+				solidity = { solhint, prettier_d },
 				lua = { luacheck, stylua },
 				python = { flake8, black },
 				typescript = { eslint, prettier_d },
@@ -187,7 +187,6 @@ local config = function()
 				vue = { eslint, prettier_d },
 				markdown = { prettier_d },
 				docker = { hadolint, prettier_d },
-				solidity = { solhint },
 				html = { prettier_d },
 				css = { prettier_d },
 				c = { clangformat, cpplint },

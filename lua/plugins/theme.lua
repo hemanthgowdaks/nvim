@@ -1,10 +1,27 @@
 return {
-	"catppuccin/nvim",
-	name = "theme",
-	lazy = false,
-	priority = 999,
-	config = function()
-		vim.cmd("colorscheme catppuccin")
-		require("catppuccin").setup({})
-	end,
+	{
+		"xiyaowong/nvim-transparent",
+		lazy = false,
+		priority = 999,
+	},
+	{
+		"EdenEast/nightfox.nvim",
+		lazy = false,
+		priority = 1000,
+		config = function()
+			local palette = require("nightfox.palette").load("nightfox")
+			require("nightfox").setup({
+				options = { transparent = true },
+				groups = {
+					all = {
+						TelescopeBorder = { fg = palette.fg3 },
+					},
+					nightfox = {
+						Visual = { bg = palette.bg1 },
+					},
+				},
+			})
+			vim.cmd.colorscheme("nightfox")
+		end,
+	},
 }
